@@ -1,4 +1,4 @@
-package com.avaj.test.crypto.hashtree;
+package com.avaj.test.hashtree;
 
 import java.util.ArrayList;
 import java.util.List;

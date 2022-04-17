@@ -53,6 +53,10 @@ public class CryptoUtils {
 		return hex;
 	}
 
+	public static String hashToHex(String data) {
+		return byteToHex(hash(data.getBytes()));
+	}
+
 	public static void printBytes(byte[] bytes) {
 		for (byte b : bytes) {
 			System.out.print(b);

@@ -1,19 +1,42 @@
-package com.avaj.test.crypto;
+package com.avaj.test;
 
 import java.io.File;
 import java.util.List;
 
-import com.avaj.test.crypto.hashtree.HashTree;
-import com.avaj.test.crypto.hashtree.HashTreeNode;
+import com.avaj.test.blockchain.Block;
+import com.avaj.test.crypto.CryptoUtils;
+import com.avaj.test.crypto.FileUtils;
+import com.avaj.test.crypto.KeyWallet;
+import com.avaj.test.hashtree.HashTree;
+import com.avaj.test.hashtree.HashTreeNode;
 
 public class TestMain {
 	public static void main(String[] args) {
 		TestMain t = new TestMain();
-		t.hashtree();
+		t.blockchain();
+	}
+
+	void blockchain() {
+		try {
+			Block genesisBlock = new Block(null, "Genesis block");
+			genesisBlock.mine();
+
+			Block secondBlock = new Block(genesisBlock, "Second block");
+			secondBlock.mine();
+
+			Block thirdBlock = new Block(secondBlock, "Third block");
+			thirdBlock.mine();
+
+			System.out.println("Validation: " + thirdBlock.isValid());
+
+//			String jsonString = new GsonBuilder().setPrettyPrinting().create().toJson(thirdBlock);
+//			System.out.println(jsonString);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	void crypto() {
-
 		try {
 			byte[] publicKey = FileUtils.load(new File("public-key.avaj"));
 			byte[] privateKey = FileUtils.load(new File("private-key.avaj"));
