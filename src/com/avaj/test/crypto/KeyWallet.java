@@ -2,12 +2,10 @@ package com.avaj.test.crypto;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -16,6 +14,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import com.avaj.test.utils.Settings;
+
 public class KeyWallet {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
@@ -23,11 +23,11 @@ public class KeyWallet {
 	public KeyWallet() {
 		try {
 			// use ECDSA
-			KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance("RSA");
+			KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(Settings.CRYPTO_ALGORITHM);
 
 			// secure random
 			SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-
+//			ECGenParameterSpec ecSpec = new ECGenParameterSpec("prime192v1");
 			keyGenerator.initialize(1024, random);
 
 			KeyPair keyPair = keyGenerator.generateKeyPair();
@@ -42,8 +42,8 @@ public class KeyWallet {
 	 * Constructor for exist key pair
 	 */
 	public KeyWallet(byte[] publicKey, byte[] privateKey) throws InvalidKeySpecException, NoSuchAlgorithmException {
-		this.publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKey));
-		this.privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+		this.publicKey = KeyFactory.getInstance(Settings.CRYPTO_ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
+		this.privateKey = KeyFactory.getInstance(Settings.CRYPTO_ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
 	}
 
 	public PublicKey getPublicKey() {

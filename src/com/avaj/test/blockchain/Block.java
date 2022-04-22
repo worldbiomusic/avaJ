@@ -3,6 +3,7 @@ package com.avaj.test.blockchain;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 import com.avaj.test.crypto.CryptoUtils;
 import com.avaj.test.utils.Settings;
@@ -13,7 +14,6 @@ public class Block {
 	private String data;
 	private LocalDateTime timeStamp; // long unixTimestamp = Instant.now().getEpochSecond();
 	private long nonce;
-
 	private int difficulty;
 
 	public Block(Block previousBlock, String data) {
@@ -23,8 +23,8 @@ public class Block {
 		this.nonce = Long.MIN_VALUE;
 		this.difficulty = (previousBlock == null) ? Settings.GENESIS_DIFFICULTY : previousBlock.getDifficulty();
 
-//		// [IMPORTANT] must be called at last after the other data setup
-//		this.hash = doHash();
+		// [IMPORTANT] must be called at last after the other data setup
+		this.hash = doHash();
 	}
 
 	public String getHash() {
@@ -109,6 +109,16 @@ public class Block {
 			// update time
 			this.timeStamp = LocalDateTime.now();
 		}
+	}
+
+	public int getSize() {
+		int count = 0;
+		Block block = this;
+		while (block != null) {
+			block = block.getPreviousBlock();
+			count++;
+		}
+		return count;
 	}
 
 	@Override

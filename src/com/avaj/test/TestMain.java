@@ -1,7 +1,10 @@
 package com.avaj.test;
 
 import java.io.File;
+import java.security.Security;
 import java.util.List;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.avaj.test.blockchain.Block;
 import com.avaj.test.crypto.CryptoUtils;
@@ -12,8 +15,10 @@ import com.avaj.test.hashtree.HashTreeNode;
 
 public class TestMain {
 	public static void main(String[] args) {
+		Security.addProvider(new BouncyCastleProvider());
+		
 		TestMain t = new TestMain();
-		t.blockchain();
+		t.crypto();
 	}
 
 	void blockchain() {
@@ -38,27 +43,29 @@ public class TestMain {
 
 	void crypto() {
 		try {
-			byte[] publicKey = FileUtils.load(new File("public-key.avaj"));
-			byte[] privateKey = FileUtils.load(new File("private-key.avaj"));
-			KeyWallet keyWallet = new KeyWallet(publicKey, privateKey);
-			System.out.println("public key");
-			for (byte b : keyWallet.getPublicKey().getEncoded()) {
-				System.out.print(b);
-			}
-			System.out.println();
+			KeyWallet keyWallet = new KeyWallet();
+			FileUtils.save(new File("private-key"), keyWallet.getPublicKey().getEncoded());
+			FileUtils.save(new File("public-key"), keyWallet.getPrivateKey().getEncoded());
+			
+			
+			
+//			byte[] publicKey = FileUtils.load(new File("public-key.avaj"));
+//			byte[] privateKey = FileUtils.load(new File("private-key.avaj"));
+//			KeyWallet keyWallet = new KeyWallet(publicKey, privateKey);
+//			System.out.println("public key");
+//			for (byte b : keyWallet.getPublicKey().getEncoded()) {
+//				System.out.print(b);
+//			}
+//			System.out.println();
 
-//			CryptographyTool cryptoTool = new CryptographyTool();
-//			String msg = "This is avaJ";
-//			byte[] msgBytes = msg.getBytes();
-//			System.out.println("raw msg: " + new String(msgBytes));
-//			FileUtils.save(new File("msg.txt"), msgBytes);
+			String msg = "This is avaJ";
+			byte[] msgBytes = msg.getBytes();
+			System.out.println("raw msg: " + new String(msgBytes));
+			FileUtils.save(new File("msg.txt"), msgBytes);
 
 			byte[] msgFileData = FileUtils.load(new File("msg.txt"));
 			byte[] encryptedData = CryptoUtils.encrypt(msgFileData, keyWallet.getPublicKey());
 			System.out.println("Encrypted msg: " + new String(encryptedData));
-
-			encryptedData = CryptoUtils.encrypt(msgFileData, keyWallet.getPublicKey());
-			System.out.println("Encrypted msg2: " + new String(encryptedData));
 
 			FileUtils.save(new File("encrypted-msg.txt"), encryptedData);
 
@@ -80,15 +87,15 @@ public class TestMain {
 
 			byte[] msg1Hash = CryptoUtils.hash(msg1.getBytes());
 //			CryptographyUtils.printBytes(msg1Hash);
-			System.out.println(CryptoUtils.byteToHex(msg1Hash));
+			System.out.println(CryptoUtils.bytesToHex(msg1Hash));
 
 			byte[] msg2Hash = CryptoUtils.hash(msg2.getBytes());
 //			CryptographyUtils.printBytes(msg2Hash);
-			System.out.println(CryptoUtils.byteToHex(msg2Hash));
+			System.out.println(CryptoUtils.bytesToHex(msg2Hash));
 
 			byte[] msg3Hash = CryptoUtils.hash(msg3.getBytes());
 //			CryptographyUtils.printBytes(msg2Hash);
-			System.out.println(CryptoUtils.byteToHex(msg3Hash));
+			System.out.println(CryptoUtils.bytesToHex(msg3Hash));
 //
 //			HashTreeNode node1 = new HashTreeNode(msg1Hash);
 //			HashTreeNode node2 = new HashTreeNode(msg2Hash);
@@ -98,7 +105,7 @@ public class TestMain {
 
 			HashTree hashTree = new HashTree(List.of(msg1Hash, msg2Hash, msg3Hash));
 			HashTreeNode root = hashTree.build().getRoot();
-			System.out.println(CryptoUtils.byteToHex(root.getDigest()));
+			System.out.println(CryptoUtils.bytesToHex(root.getDigest()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
