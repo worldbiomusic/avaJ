@@ -1,5 +1,6 @@
-package com.avaj.test.crypto;
+package com.avaj.crypto;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -11,7 +12,7 @@ import java.util.List;
 
 import javax.crypto.Cipher;
 
-import com.avaj.test.utils.Settings;
+import com.avaj.utils.Settings;
 
 public class CryptoUtils {
 
@@ -50,6 +51,12 @@ public class CryptoUtils {
 		}
 	}
 
+	public static String hexToBinary(String hex) {
+		int length = hex.length() * 4;
+		String format = "%" + length + "s";
+		return String.format(format, new BigInteger(hex, 16).toString(2)).replace(" ", "0");
+	}
+
 	public static String bytesToHex(byte[] bytes) {
 		String hex = "";
 		for (byte b : bytes) {
@@ -58,8 +65,8 @@ public class CryptoUtils {
 		return hex;
 	}
 
-	public static String hashToHex(String data) {
-		return bytesToHex(hash(data.getBytes()));
+	public static String hashToHex(byte[] bytes) {
+		return bytesToHex(hash(bytes));
 	}
 
 	public static void printBytes(byte[] bytes) {

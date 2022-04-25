@@ -1,8 +1,8 @@
-package com.avaj.test.hashtree;
+package com.avaj.hashtree;
 
 import java.util.List;
 
-import com.avaj.test.crypto.CryptoUtils;
+import com.avaj.crypto.CryptoUtils;
 
 public class HashTreeNode {
 	private byte[] digest;

@@ -1,4 +1,4 @@
-package com.avaj.test.hashtree;
+package com.avaj.hashtree;
 
 import java.util.ArrayList;
 import java.util.List;

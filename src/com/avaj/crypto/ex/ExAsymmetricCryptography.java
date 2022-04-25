@@ -1,4 +1,4 @@
-package com.avaj.test.crypto.ex;
+package com.avaj.crypto.ex;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -1,4 +1,4 @@
-package com.avaj.test.crypto.ex;
+package com.avaj.crypto.ex;
 
 import java.security.KeyFactory;
 import java.security.KeyPair;

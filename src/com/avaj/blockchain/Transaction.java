@@ -1,15 +1,15 @@
-package com.avaj.test.blockchain;
+package com.avaj.blockchain;
 
 import java.time.LocalDateTime;
 
-import com.avaj.test.crypto.CryptoUtils;
+import com.avaj.crypto.CryptoUtils;
 
 public class Transaction {
 	private String hash;
 	private Account sender, receiver;
 	private long value, fee;
 	private byte[] signature;
-	LocalDateTime timeStamp;
+	private LocalDateTime timeStamp;
 
 	public Transaction(Account sender, Account receiver, long value, long fee) {
 		this.sender = sender;
@@ -21,7 +21,7 @@ public class Transaction {
 		// [IMPORTANT] must be called at last after the other data setup
 		this.hash = doHash();
 		
-		// sign
+		// sign transaction
 		sign();
 	}
 
@@ -29,7 +29,7 @@ public class Transaction {
 		String allData = sender.getHexPublicKey() + receiver.getHexPublicKey() + Long.valueOf(this.value)
 				+ Long.valueOf(this.fee) + this.timeStamp.toString();
 
-		return CryptoUtils.bytesToHex(allData.getBytes());
+		return CryptoUtils.hashToHex(allData.getBytes());
 	}
 
 	/**

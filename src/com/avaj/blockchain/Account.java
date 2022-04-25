@@ -1,7 +1,7 @@
-package com.avaj.test.blockchain;
+package com.avaj.blockchain;
 
-import com.avaj.test.crypto.CryptoUtils;
-import com.avaj.test.crypto.KeyWallet;
+import com.avaj.crypto.CryptoUtils;
+import com.avaj.crypto.KeyWallet;
 
 public class Account {
 	private KeyWallet keyWallet;
@@ -44,5 +44,10 @@ public class Account {
 
 	public long getValue() {
 		return this.value;
+	}
+
+	public String doHash() {
+		String allData = this.keyWallet.doHash() + Long.toString(this.value);
+		return CryptoUtils.hashToHex(allData.getBytes());
 	}
 }

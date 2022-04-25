@@ -1,4 +1,4 @@
-package com.avaj.test.crypto;
+package com.avaj.crypto;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import com.avaj.test.utils.Settings;
+import com.avaj.utils.Settings;
 
 public class KeyWallet {
 	private PublicKey publicKey;
@@ -60,5 +60,10 @@ public class KeyWallet {
 
 	public void savePrivateKey(File file) throws IOException {
 		FileUtils.save(file, this.getPrivateKey().getEncoded());
+	}
+	
+	public String doHash() {
+		// only public key exists on the network
+		return CryptoUtils.hashToHex(this.publicKey.getEncoded());
 	}
 }
