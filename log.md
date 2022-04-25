@@ -11,4 +11,5 @@
 
 # 2022-04-25
 - Add difficulty retargeting, block reward halving
-- 
+- Add Account, Transaction list to `Block`
+- Change HashTree data to String from bytes

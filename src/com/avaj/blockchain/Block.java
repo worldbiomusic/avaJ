@@ -4,8 +4,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.avaj.crypto.CryptoUtils;
+import com.avaj.hashtree.HashTree;
 import com.avaj.utils.Settings;
 
 /**
@@ -19,7 +22,9 @@ public class Block {
 	private long nonce;
 	private int difficulty;
 	private long reward;
-	
+
+	private Set<Account> accounts;
+	private Set<Transaction> transactions;
 
 	public Block(Block previousBlock) {
 		this.previousBlock = previousBlock;
@@ -27,6 +32,9 @@ public class Block {
 		this.nonce = Long.MIN_VALUE;
 		retargetDifficulty();
 		reduceReward();
+
+		this.accounts = new HashSet<>();
+		this.transactions = new HashSet<>();
 
 		// [IMPORTANT] must be called at last after the other data setup
 		this.hash = doHash();
@@ -56,10 +64,50 @@ public class Block {
 		return this.reward;
 	}
 
+	public Set<Account> getAccounts() {
+		return accounts;
+	}
+
+	public HashTree getAccountHashTree() {
+		HashTree tree = new HashTree();
+		this.accounts.forEach(a -> tree.addData(a.doHash()));
+		return tree.build();
+	}
+
+	public Set<Transaction> getTransactions() {
+		return transactions;
+	}
+
+	public HashTree getTransactionHashTree() {
+		HashTree tree = new HashTree();
+		this.transactions.forEach(t -> tree.addData(t.doHash()));
+		return tree.build();
+	}
+
 	public String doHash() {
-		String previousBlockHash = (this.previousBlock == null) ? "0" : this.previousBlock.getHash();
-		String allData = previousBlockHash + this.timeStamp.toString() + Long.toString(this.nonce)
-				+ Integer.toString(this.difficulty) + Long.toString(this.reward);
+		String allData = "";
+
+		// previous block
+		allData += (this.previousBlock == null) ? "0" : this.previousBlock.getHash();
+
+		// time stamp
+		allData += this.timeStamp.toString();
+
+		// nonce
+		allData += Long.toString(this.nonce);
+
+		// difficulty
+		allData += Integer.toString(this.difficulty);
+
+		// reward
+		allData += Long.toString(this.reward);
+
+		// accounts
+		allData += getAccountHashTree().getRoot().getHash();
+
+		// transactions
+		allData += getTransactionHashTree().getRoot().getHash();
+
 		return CryptoUtils.hashToHex(allData.getBytes());
 	}
 
@@ -72,7 +120,7 @@ public class Block {
 		boolean isValid = true;
 
 		Block block = this;
-		while (block != null) {
+		while (block != null && isValid) {
 			// check data
 			isValid &= block.getHash().equals(block.doHash());
 			// check hash difficulty
@@ -147,10 +195,10 @@ public class Block {
 		}
 
 		// check difficulty retargeting period
-		if (getSize() % Settings.DIFFICULTY_RETARGETING_PERIOD == 0) {
+		if (getSize() % Settings.DIFFICULTY_RETARGETING_INTERVAL == 0) {
 			double avgMiningSec = 0;
 			Block block = this;
-			for (int i = 0; i < Settings.DIFFICULTY_RETARGETING_PERIOD && block != null; i++) {
+			for (int i = 0; i < Settings.DIFFICULTY_RETARGETING_INTERVAL && block != null; i++) {
 				long secDiff = ChronoUnit.SECONDS.between(block.getTimeStamp(),
 						block.getPreviousBlock().getTimeStamp());
 				avgMiningSec += secDiff;
@@ -160,10 +208,10 @@ public class Block {
 			}
 
 			// avg
-			avgMiningSec /= Settings.DIFFICULTY_RETARGETING_PERIOD;
+			avgMiningSec /= Settings.DIFFICULTY_RETARGETING_INTERVAL;
 
 			// rate
-			int rate = (int) ((avgMiningSec / Settings.DIFFICULTY_RETARGETING_PERIOD) * 100);
+			int rate = (int) ((avgMiningSec / Settings.DIFFICULTY_RETARGETING_INTERVAL) * 100);
 
 			// retarget difficulty
 
@@ -179,7 +227,7 @@ public class Block {
 		}
 
 		// check reward halving period
-		if (getSize() % Settings.REWARD_HALVING_PERIOD == 0) {
+		if (getSize() % Settings.REWARD_HALVING_INTERVAL == 0) {
 			this.reward -= this.reward * Settings.REWARD_HALVING_RATE;
 		} else {
 			this.reward = this.previousBlock.getReward();

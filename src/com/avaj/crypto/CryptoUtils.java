@@ -51,6 +51,10 @@ public class CryptoUtils {
 		}
 	}
 
+	public static String hashToHex(byte[] bytes) {
+		return bytesToHex(hash(bytes));
+	}
+
 	public static String hexToBinary(String hex) {
 		int length = hex.length() * 4;
 		String format = "%" + length + "s";
@@ -63,10 +67,6 @@ public class CryptoUtils {
 			hex += String.format("%02x", b);
 		}
 		return hex;
-	}
-
-	public static String hashToHex(byte[] bytes) {
-		return bytesToHex(hash(bytes));
 	}
 
 	public static void printBytes(byte[] bytes) {

@@ -116,9 +116,9 @@ public class Main {
 //			
 //			System.out.println(CryptographyUtils.byteToHex(node12.getDigest()));
 
-			HashTree hashTree = new HashTree(List.of(msg1Hash, msg2Hash, msg3Hash));
-			HashTreeNode root = hashTree.build().getRoot();
-			System.out.println(CryptoUtils.bytesToHex(root.getDigest()));
+//			HashTree hashTree = new HashTree(List.of(msg1Hash, msg2Hash, msg3Hash));
+//			HashTreeNode root = hashTree.build().getRoot();
+//			System.out.println(CryptoUtils.bytesToHex(root.getHash()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
