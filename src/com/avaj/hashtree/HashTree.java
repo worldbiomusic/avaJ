@@ -5,14 +5,18 @@ import java.util.List;
 
 public class HashTree {
 	private HashTreeNode root;
-	
-	/**
-	 * Not raw bytes, hashed value bytes (digest)
-	 */
-	private List<byte[]> hashBytes;
 
-	public HashTree(List<byte[]> hashBytes) {
-		this.hashBytes = hashBytes;
+	/**
+	 * Not raw data, hashed value
+	 */
+	private List<String> hashData;
+
+	public HashTree() {
+		this.hashData = new ArrayList<>();
+	}
+
+	public HashTree(List<String> hashData) {
+		this.hashData = hashData;
 	}
 
 	public HashTreeNode getRoot() {
@@ -20,14 +24,14 @@ public class HashTree {
 	}
 
 	public HashTree build() {
-		if (this.hashBytes.isEmpty()) {
+		if (this.hashData.isEmpty()) {
 			return this;
 		}
 
-		// convert byte data to HashTreeNode
+		// convert to HashTreeNode
 		List<HashTreeNode> nodes = new ArrayList<>();
-		for (byte[] bytes : this.hashBytes) {
-			nodes.add(new HashTreeNode(bytes));
+		for (String hash : this.hashData) {
+			nodes.add(new HashTreeNode(hash));
 		}
 
 		// combine all nodes until only one node remains
@@ -46,7 +50,7 @@ public class HashTree {
 
 		// set root node
 		this.root = nodes.get(0);
-		
+
 		return this;
 	}
 
@@ -54,16 +58,16 @@ public class HashTree {
 		return new HashTreeNode(node1, node2);
 	}
 
-	public void addData(byte[] data) {
-		this.hashBytes.add(data);
+	public void addData(String data) {
+		this.hashData.add(data);
 	}
 
-	public void removeData(byte[] data) {
-		this.hashBytes.remove(data);
+	public void removeData(String data) {
+		this.hashData.remove(data);
 	}
 
-	public boolean containsData(byte[] data) {
-		return this.hashBytes.contains(data);
+	public boolean containsData(String data) {
+		return this.hashData.contains(data);
 	}
 
 }

@@ -1,31 +1,28 @@
 package com.avaj.hashtree;
 
-import java.util.List;
-
 import com.avaj.crypto.CryptoUtils;
 
 public class HashTreeNode {
-	private byte[] digest;
+	private String hash;
 	private HashTreeNode leftChild;
 	private HashTreeNode rightChild;
 
-	public HashTreeNode(byte[] digest) {
-		this.digest = digest;
+	public HashTreeNode(String hash) {
+		this.hash = hash;
 	}
 
 	public HashTreeNode(HashTreeNode leftChild, HashTreeNode rightChild) {
 		this.leftChild = leftChild;
 		this.rightChild = rightChild;
 
-		// set digest using left and right child's digest
-		byte[] combinedBytes = CryptoUtils
-				.combineBytes(List.of(leftChild.getDigest(), rightChild.getDigest()));
+		// set hash using left and right child's hash
+		String combinedHash = leftChild.getHash() + rightChild.getHash();
 
-		this.digest = CryptoUtils.hash(combinedBytes);
+		this.hash = CryptoUtils.hashToHex(combinedHash.getBytes());
 	}
 
-	public byte[] getDigest() {
-		return this.digest;
+	public String getHash() {
+		return this.hash;
 	}
 
 	public HashTreeNode getLeftChild() {
