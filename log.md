@@ -2,6 +2,8 @@
 - Use `ECDSA` algorithm
 - Create avaJ account with Genesis block
 - Simple p2p network
+- Create `AccountManager`, `TransactionManager`
+
 ---
 
 # 2022-04-23

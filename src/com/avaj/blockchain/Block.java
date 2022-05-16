@@ -1,14 +1,11 @@
 package com.avaj.blockchain;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 import com.avaj.crypto.CryptoUtils;
-import com.avaj.hashtree.HashTree;
 import com.avaj.utils.Settings;
 
 /**
@@ -17,24 +14,25 @@ import com.avaj.utils.Settings;
  */
 public class Block {
 	private String hash;
-	private Block previousBlock;
-	private LocalDateTime timeStamp; // long unixTimestamp = Instant.now().getEpochSecond();
+	private Instant timeStamp;
 	private long nonce;
 	private int difficulty;
 	private long reward;
 
-	private Set<Account> accounts;
-	private Set<Transaction> transactions;
+	private AccountManager accountManager;
+	private TransactionManager transactionManager;
+	private Block previousBlock;
 
 	public Block(Block previousBlock) {
 		this.previousBlock = previousBlock;
-		this.timeStamp = LocalDateTime.now();
+		this.timeStamp = Instant.now();
 		this.nonce = Long.MIN_VALUE;
 		retargetDifficulty();
 		reduceReward();
 
-		this.accounts = new HashSet<>();
-		this.transactions = new HashSet<>();
+		this.accountManager = new AccountManager(this,
+				this.previousBlock == null ? new ArrayList<>() : this.previousBlock.getAccountManager().getAccounts());
+		this.transactionManager = new TransactionManager(this);
 
 		// [IMPORTANT] must be called at last after the other data setup
 		this.hash = doHash();
@@ -48,7 +46,7 @@ public class Block {
 		return previousBlock;
 	}
 
-	public LocalDateTime getTimeStamp() {
+	public Instant getTimeStamp() {
 		return timeStamp;
 	}
 
@@ -64,24 +62,12 @@ public class Block {
 		return this.reward;
 	}
 
-	public Set<Account> getAccounts() {
-		return accounts;
+	public AccountManager getAccountManager() {
+		return this.accountManager;
 	}
 
-	public HashTree getAccountHashTree() {
-		HashTree tree = new HashTree();
-		this.accounts.forEach(a -> tree.addData(a.doHash()));
-		return tree.build();
-	}
-
-	public Set<Transaction> getTransactions() {
-		return transactions;
-	}
-
-	public HashTree getTransactionHashTree() {
-		HashTree tree = new HashTree();
-		this.transactions.forEach(t -> tree.addData(t.doHash()));
-		return tree.build();
+	public TransactionManager getTransactionManager() {
+		return this.transactionManager;
 	}
 
 	public String doHash() {
@@ -91,7 +77,7 @@ public class Block {
 		allData += (this.previousBlock == null) ? "0" : this.previousBlock.getHash();
 
 		// time stamp
-		allData += this.timeStamp.toString();
+		allData += this.timeStamp.toEpochMilli();
 
 		// nonce
 		allData += Long.toString(this.nonce);
@@ -103,10 +89,10 @@ public class Block {
 		allData += Long.toString(this.reward);
 
 		// accounts
-		allData += getAccountHashTree().getRoot().getHash();
+		allData += this.accountManager.getHashTree().getRoot().getHash();
 
 		// transactions
-		allData += getTransactionHashTree().getRoot().getHash();
+		allData += this.transactionManager.getHashTree().getRoot().getHash();
 
 		return CryptoUtils.hashToHex(allData.getBytes());
 	}
@@ -122,9 +108,10 @@ public class Block {
 		Block block = this;
 		while (block != null && isValid) {
 			// check data
-			isValid &= block.getHash().equals(block.doHash());
+			isValid &= block.isHashValid();
 			// check hash difficulty
-			isValid &= CryptoUtils.hexToBinary(block.getHash()).startsWith("0".repeat(block.getDifficulty()));
+			isValid &= block.isDifficultyValid();
+
 			// move to previous block
 			block = block.getPreviousBlock();
 		}
@@ -132,11 +119,22 @@ public class Block {
 		return isValid;
 	}
 
+	public boolean isHashValid() {
+		return getHash().equals(doHash());
+	}
+
+	public boolean isDifficultyValid() {
+		return CryptoUtils.hexToBinary(getHash()).startsWith("0".repeat(getDifficulty()));
+	}
+
 	/**
 	 * Mine block<br>
 	 * Run with other thread
 	 */
 	public void mine() {
+		// build
+		build();
+		
 		System.out.print("Start mining... ");
 		String target = "0".repeat(this.difficulty);
 
@@ -153,14 +151,14 @@ public class Block {
 					String duration = Duration.between(startTime, finishTime).toMillis() + "";
 					System.out.println("Duration:  " + duration + " ms");
 
-					System.out.println(toString() + "\n");
+//					System.out.println(toString() + "\n");
 					return;
 				}
 				nonce++;
 			}
 
 			// update time
-			this.timeStamp = LocalDateTime.now();
+			this.timeStamp = Instant.now();
 		}
 	}
 
@@ -199,8 +197,8 @@ public class Block {
 			double avgMiningSec = 0;
 			Block block = this;
 			for (int i = 0; i < Settings.DIFFICULTY_RETARGETING_INTERVAL && block != null; i++) {
-				long secDiff = ChronoUnit.SECONDS.between(block.getTimeStamp(),
-						block.getPreviousBlock().getTimeStamp());
+				long secDiff = block.getTimeStamp().getEpochSecond()
+						- block.getPreviousBlock().getTimeStamp().getEpochSecond();
 				avgMiningSec += secDiff;
 
 				// move to previous block
@@ -234,10 +232,27 @@ public class Block {
 		}
 	}
 
+	public void build() {
+		this.transactionManager.processTransactions();
+	}
+
+	public Account getMiner() {
+		return this.transactionManager.getMiner();
+	}
+
 	@Override
 	public String toString() {
-		return "Block [hash=" + hash + ", previousBlock=" + previousBlock + ", timeStamp=" + timeStamp + ", nonce="
-				+ nonce + ", difficulty=" + difficulty + "]";
+		return "Block [\nhash=" + hash + ", \ntimeStamp=" + timeStamp + ", \nnonce=" + nonce + ", \ndifficulty="
+				+ difficulty + ", \nreward=" + reward + ", \naccounts=" + this.accountManager.getAccounts()
+				+ ", \ntransactions=" + this.transactionManager.getTransactions() + ", \npreviousBlock=" + previousBlock
+				+ "]";
 	}
+
+//	@Override
+//	public String toString() {
+//		return "Block [hash=" + hash + ", \\ntimeStamp=" + timeStamp + ", \\nnonce=" + nonce + ", \\ndifficulty="
+//				+ difficulty + ", \\nreward=" + reward + ", \\naccounts=" + accounts + ", \\ntransactions="
+//				+ transactions + ", \\npreviousBlock=" + previousBlock + "]";
+//	}
 
 }

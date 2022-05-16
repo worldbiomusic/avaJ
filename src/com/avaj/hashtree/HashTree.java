@@ -25,6 +25,7 @@ public class HashTree {
 
 	public HashTree build() {
 		if (this.hashData.isEmpty()) {
+			this.root = new HashTreeNode("0");
 			return this;
 		}
 

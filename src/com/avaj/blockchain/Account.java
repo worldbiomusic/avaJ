@@ -3,7 +3,7 @@ package com.avaj.blockchain;
 import com.avaj.crypto.CryptoUtils;
 import com.avaj.crypto.KeyWallet;
 
-public class Account {
+public class Account implements Cloneable {
 	private KeyWallet keyWallet;
 	private long value;
 
@@ -25,21 +25,40 @@ public class Account {
 	}
 
 	public boolean plusValue(long amount) {
-		if (this.value + amount > Long.MAX_VALUE) {
-			return false;
+		if (canValueChange(amount)) {
+			this.value += amount;
+			return true;
 		}
-
-		this.value += amount;
-		return true;
+		return false;
 	}
 
-	public boolean minusValue(int amount) {
-		if (this.value - amount < 0) {
-			return false;
-		}
+	private boolean canPlusValue(long amount) {
+		return !(this.value + amount > Long.MAX_VALUE);
+	}
 
-		this.value -= amount;
-		return true;
+	public boolean minusValue(long amount) {
+		if (canValueChange(-amount)) {
+			this.value -= amount;
+			return true;
+		}
+		return false;
+	}
+
+	private boolean canMinusValue(long amount) {
+		return !(this.value - amount < 0);
+	}
+
+	public boolean canValueChange(long offset) {
+		return offset > 0 ? canPlusValue(offset) : canMinusValue(-offset);
+	}
+
+	public boolean sendValue(Account receiver, long amount) {
+		if (canValueChange(-amount) && receiver.canValueChange(amount)) {
+			minusValue(amount);
+			receiver.plusValue(amount);
+			return true;
+		}
+		return false;
 	}
 
 	public long getValue() {
@@ -49,5 +68,30 @@ public class Account {
 	public String doHash() {
 		String allData = this.keyWallet.doHash() + Long.toString(this.value);
 		return CryptoUtils.hashToHex(allData.getBytes());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof String) {
+			// hex public key string
+			return getHexPublicKey().equals((String) obj);
+		} else if (obj instanceof Account) {
+			return getHexPublicKey().equals(((Account) obj).getHexPublicKey());
+		}
+		return false;
+	}
+
+	@Override
+	public Object clone() {
+		try {
+			Account copiedAccount = (Account) super.clone();
+			copiedAccount.keyWallet = (KeyWallet) this.keyWallet.clone();
+			return copiedAccount;
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

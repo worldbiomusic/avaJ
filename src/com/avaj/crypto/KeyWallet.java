@@ -5,17 +5,15 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import com.avaj.utils.Settings;
 
-public class KeyWallet {
+public class KeyWallet implements Cloneable {
 	private PublicKey publicKey;
 	private PrivateKey privateKey;
 
@@ -40,9 +38,22 @@ public class KeyWallet {
 	/**
 	 * Constructor for exist key pair
 	 */
-	public KeyWallet(byte[] publicKey, byte[] privateKey) throws InvalidKeySpecException, NoSuchAlgorithmException {
-		this.publicKey = KeyFactory.getInstance(Settings.CRYPTO_ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
-		this.privateKey = KeyFactory.getInstance(Settings.CRYPTO_ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+	public KeyWallet(byte[] publicKey, byte[] privateKey) {
+		try {
+			this.publicKey = KeyFactory.getInstance(Settings.CRYPTO_ALGORITHM)
+					.generatePublic(new X509EncodedKeySpec(publicKey));
+			if (privateKey != null) {
+				this.privateKey = KeyFactory.getInstance(Settings.CRYPTO_ALGORITHM)
+						.generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public KeyWallet(String publicKeyHex, String privateKeyHex) {
+		this(CryptoUtils.hexToBytes(publicKeyHex),
+				(privateKeyHex == null) ? null : CryptoUtils.hexToBytes(privateKeyHex));
 	}
 
 	public PublicKey getPublicKey() {
@@ -60,9 +71,16 @@ public class KeyWallet {
 	public void savePrivateKey(File file) throws IOException {
 		FileUtils.save(file, this.getPrivateKey().getEncoded());
 	}
-	
+
 	public String doHash() {
 		// only public key exists on the network
 		return CryptoUtils.hashToHex(this.publicKey.getEncoded());
+	}
+
+	@Override
+	public Object clone() {
+		String publicKeyHex = CryptoUtils.bytesToHex(this.publicKey.getEncoded());
+		String privateKeyHex = CryptoUtils.bytesToHex(this.privateKey.getEncoded());
+		return new KeyWallet(publicKeyHex, privateKeyHex);
 	}
 }

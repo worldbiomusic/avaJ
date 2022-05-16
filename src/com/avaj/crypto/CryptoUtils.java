@@ -67,6 +67,16 @@ public class CryptoUtils {
 			hex += String.format("%02x", b);
 		}
 		return hex;
+
+	}
+
+	public static byte[] hexToBytes(String hex) {
+		int len = hex.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4) + Character.digit(hex.charAt(i + 1), 16));
+		}
+		return data;
 	}
 
 	public static void printBytes(byte[] bytes) {
@@ -93,7 +103,7 @@ public class CryptoUtils {
 	public static byte[] sign(byte[] data, PrivateKey key) {
 		byte[] sign = new byte[0];
 		try {
-			Signature signature = Signature.getInstance(Settings.CRYPTO_ALGORITHM, "BC");
+			Signature signature = Signature.getInstance("SHA256withRSA");
 			signature.initSign(key);
 			signature.update(data);
 			sign = signature.sign();
@@ -106,7 +116,7 @@ public class CryptoUtils {
 	public static boolean verify(byte[] data, PublicKey publicKey, byte[] sign) {
 		boolean verified = false;
 		try {
-			Signature signature = Signature.getInstance(Settings.CRYPTO_ALGORITHM, "BC");
+			Signature signature = Signature.getInstance("SHA256withRSA");
 			signature.initVerify(publicKey);
 			signature.update(data);
 			verified = signature.verify(sign);

@@ -65,3 +65,6 @@ dependency-reduced-pom.xml
 *.jardesc
 *.fatjar
 /*.jar
+
+# avaJ
+account/
