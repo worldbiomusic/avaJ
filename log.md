@@ -15,3 +15,26 @@
 - Add difficulty retargeting, block reward halving
 - Add Account, Transaction list to `Block`
 - Change HashTree data to String from bytes
+
+# 2022-05-16
+- Add AccountManager, TranscationManager to Block
+- Add simple command executor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,6 @@
 package com.avaj.blockchain;
 
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
@@ -13,10 +14,12 @@ import com.avaj.utils.Settings;
  *
  */
 public class Block {
+	transient public static Block TOP;
+
 	private String hash;
 	private Instant timeStamp;
 	private long nonce;
-	private int difficulty;
+	private BigInteger difficulty;
 	private long reward;
 
 	private AccountManager accountManager;
@@ -54,7 +57,7 @@ public class Block {
 		return this.nonce;
 	}
 
-	public int getDifficulty() {
+	public BigInteger getDifficulty() {
 		return this.difficulty;
 	}
 
@@ -83,7 +86,7 @@ public class Block {
 		allData += Long.toString(this.nonce);
 
 		// difficulty
-		allData += Integer.toString(this.difficulty);
+		allData += String.valueOf(this.difficulty);
 
 		// reward
 		allData += Long.toString(this.reward);
@@ -124,7 +127,10 @@ public class Block {
 	}
 
 	public boolean isDifficultyValid() {
-		return CryptoUtils.hexToBinary(getHash()).startsWith("0".repeat(getDifficulty()));
+		BigInteger hash = new BigInteger(CryptoUtils.hexToBinary(getHash()));
+
+		// hash is bigger than or equals with difficulty
+		return hash.compareTo(this.difficulty) > -1;
 	}
 
 	/**
@@ -134,14 +140,14 @@ public class Block {
 	public void mine() {
 		// build
 		build();
-		
+
 		System.out.print("Start mining... ");
-		String target = "0".repeat(this.difficulty);
+		String target = "0";
 
 		LocalTime startTime = LocalTime.now();
 
 		// never stop
-		while (true) {
+		OUT: while (true) {
 			while (this.nonce <= Long.MAX_VALUE) {
 				if (CryptoUtils.hexToBinary(doHash()).startsWith(target)) {
 					this.hash = doHash();
@@ -150,9 +156,7 @@ public class Block {
 					LocalTime finishTime = LocalTime.now();
 					String duration = Duration.between(startTime, finishTime).toMillis() + "";
 					System.out.println("Duration:  " + duration + " ms");
-
-//					System.out.println(toString() + "\n");
-					return;
+					break OUT;
 				}
 				nonce++;
 			}
@@ -160,9 +164,12 @@ public class Block {
 			// update time
 			this.timeStamp = Instant.now();
 		}
+
+		// update TOP
+		TOP = this;
 	}
 
-	public int getSize() {
+	public int getLength() {
 		int count = 0;
 		Block block = this;
 		while (block != null) {
@@ -180,7 +187,7 @@ public class Block {
 	 */
 	public Block indexOf(long index) {
 		Block block = this;
-		for (int i = 0; i < getSize() - index; i++) {
+		for (int i = 0; i < getLength() - index; i++) {
 			block = block.getPreviousBlock();
 		}
 		return block;
@@ -193,7 +200,7 @@ public class Block {
 		}
 
 		// check difficulty retargeting period
-		if (getSize() % Settings.DIFFICULTY_RETARGETING_INTERVAL == 0) {
+		if (getLength() % Settings.DIFFICULTY_RETARGETING_INTERVAL == 0) {
 			double avgMiningSec = 0;
 			Block block = this;
 			for (int i = 0; i < Settings.DIFFICULTY_RETARGETING_INTERVAL && block != null; i++) {
@@ -212,7 +219,7 @@ public class Block {
 			int rate = (int) ((avgMiningSec / Settings.DIFFICULTY_RETARGETING_INTERVAL) * 100);
 
 			// retarget difficulty
-
+			this.difficulty = this.difficulty.multiply(new BigInteger(String.valueOf(rate)));
 		} else {
 			this.difficulty = this.previousBlock.getDifficulty();
 		}
@@ -225,7 +232,7 @@ public class Block {
 		}
 
 		// check reward halving period
-		if (getSize() % Settings.REWARD_HALVING_INTERVAL == 0) {
+		if (getLength() % Settings.REWARD_HALVING_INTERVAL == 0) {
 			this.reward -= this.reward * Settings.REWARD_HALVING_RATE;
 		} else {
 			this.reward = this.previousBlock.getReward();

@@ -1,6 +1,7 @@
 package com.avaj;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -18,9 +19,18 @@ public class avaJTestMain {
 	public static void main(String[] args) {
 //		Security.addProvider(new BouncyCastleProvider());
 
+		BigInteger difficulty = new BigInteger("4");
+//		BigInteger hash = new BigInteger("");
+//		System.out.println(difficulty.compareTo(hash));
+		
+		System.out.println(difficulty);
+		
+		difficulty.multiply(new BigInteger("2"));
+		System.out.println(difficulty);
+
 		try {
 			avaJTestMain t = new avaJTestMain();
-			t.blockchain();
+//			t.blockchain();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,13 +84,13 @@ public class avaJTestMain {
 			secondBlock.mine();
 			System.out.println("Validation2: " + secondBlock.isValid());
 			System.out.println(gson.toJson(secondBlock));
-			
+
 			System.out.println("avaJ: " + avaJ.getValue());
 			System.out.println("miner: " + miner.getValue());
 
 			// third
 			Block thirdBlock = new Block(secondBlock);
-			
+
 //			avaJ = thirdBlock.getAccountManager().getAccount(avaJ.getHexPublicKey());
 //			miner = thirdBlock.getAccountManager().getAccount(miner.getHexPublicKey());
 			thirdBlock.getTransactionManager().addTransaction(new Transaction(avaJ, miner, thirdBlock.getReward(), 0));

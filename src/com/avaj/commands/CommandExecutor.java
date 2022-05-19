@@ -3,6 +3,7 @@ package com.avaj.commands;
 import java.io.File;
 
 import com.avaj.blockchain.AccountHelper;
+import com.avaj.blockchain.Block;
 import com.avaj.utils.Settings;
 
 /**
@@ -14,6 +15,9 @@ public class CommandExecutor {
 		switch (command) {
 		case "account":
 			account(args);
+			break;
+		case "block":
+			block(args);
 			break;
 		case "exit":
 			exit(args);
@@ -35,6 +39,36 @@ public class CommandExecutor {
 				System.out.println(accountFile.getAbsolutePath() + " generated");
 			}
 		}
+	}
+
+	/*
+	 * block status [index]
+	 * block account <public-key>
+	 */
+	private void block(String[] args) {
+		String menu = args[0];
+
+		switch (menu) {
+		case "status":
+
+			break;
+		case "account":
+
+			break;
+		}
+	}
+
+	private void block_status(String[] args) {
+		int index = (args.length == 2) ? Integer.parseInt(args[1]) : Block.TOP.getLength() ;
+		
+		Block topBlock = Block.TOP;
+		topBlock.indexOf(index);
+		
+		
+	}
+
+	private void block_account(String[] args) {
+
 	}
 
 	private void exit(String[] args) {
