@@ -21,6 +21,7 @@ public class Block {
 	private long nonce;
 	private BigInteger difficulty;
 	private long reward;
+	private long length;
 
 	private AccountManager accountManager;
 	private TransactionManager transactionManager;
@@ -30,15 +31,21 @@ public class Block {
 		this.previousBlock = previousBlock;
 		this.timeStamp = Instant.now();
 		this.nonce = Long.MIN_VALUE;
+		this.length = isGenesis() ? 0 : this.previousBlock.getLength() + 1;
+
 		retargetDifficulty();
 		reduceReward();
 
 		this.accountManager = new AccountManager(this,
-				this.previousBlock == null ? new ArrayList<>() : this.previousBlock.getAccountManager().getAccounts());
+				isGenesis() ? new ArrayList<>() : this.previousBlock.getAccountManager().getAccounts());
 		this.transactionManager = new TransactionManager(this);
 
 		// [IMPORTANT] must be called at last after the other data setup
 		this.hash = doHash();
+	}
+
+	public boolean isGenesis() {
+		return this.previousBlock == null;
 	}
 
 	public String getHash() {
@@ -77,7 +84,7 @@ public class Block {
 		String allData = "";
 
 		// previous block
-		allData += (this.previousBlock == null) ? "0" : this.previousBlock.getHash();
+		allData += (isGenesis()) ? "0" : this.previousBlock.getHash();
 
 		// time stamp
 		allData += this.timeStamp.toEpochMilli();
@@ -90,6 +97,9 @@ public class Block {
 
 		// reward
 		allData += Long.toString(this.reward);
+
+		// length
+		allData += String.valueOf(this.length);
 
 		// accounts
 		allData += this.accountManager.getHashTree().getRoot().getHash();
@@ -169,23 +179,20 @@ public class Block {
 		TOP = this;
 	}
 
-	public int getLength() {
-		int count = 0;
-		Block block = this;
-		while (block != null) {
-			block = block.getPreviousBlock();
-			count++;
-		}
-		return count;
+	public long getLength() {
+		return this.length;
 	}
 
 	/**
-	 * Genesis block = 1 index
+	 * Genesis block = 0 index
 	 * 
 	 * @param index Index of block
 	 * @return Block
 	 */
 	public Block indexOf(long index) {
+		// plus index 1
+		index += 1;
+
 		Block block = this;
 		for (int i = 0; i < getLength() - index; i++) {
 			block = block.getPreviousBlock();

@@ -20,9 +20,9 @@
 - Add AccountManager, TranscationManager to Block
 - Add simple command executor
 
-
-
-
+# 2022-05-17
+- Change difficulty algorithm
+- Add `length` to Block
 
 
 

@@ -9,7 +9,7 @@ public class Settings {
 	public static final BigInteger GENESIS_DIFFICULTY = new BigInteger("0x100000");
 	public static final long GENESIS_REWARD = 1_000;
 	public static final long TOTAL_SUPPLY = 5_143_521_600L; // 50 years
-//	public static final 
+
 	public static final double REWARD_HALVING_RATE = 1 / 10;
 	public static final int REWARD_HALVING_INTERVAL = 525_600;
 	public static final int DIFFICULTY_RETARGETING_INTERVAL = 1_440;

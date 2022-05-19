@@ -4,7 +4,6 @@ import java.io.File;
 
 import com.avaj.blockchain.AccountHelper;
 import com.avaj.blockchain.Block;
-import com.avaj.utils.Settings;
 
 /**
  * e.g. key(command) generate(args0) {@code<account>}(args1)
@@ -59,12 +58,11 @@ public class CommandExecutor {
 	}
 
 	private void block_status(String[] args) {
-		int index = (args.length == 2) ? Integer.parseInt(args[1]) : Block.TOP.getLength() ;
-		
+		long index = (args.length == 2) ? Long.parseLong(args[1]) : Block.TOP.getLength();
+
 		Block topBlock = Block.TOP;
 		topBlock.indexOf(index);
-		
-		
+
 	}
 
 	private void block_account(String[] args) {
