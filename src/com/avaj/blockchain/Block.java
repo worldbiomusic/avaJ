@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import com.avaj.crypto.CryptoUtils;
 import com.avaj.utils.Settings;
+import com.avaj.utils.Utils;
 
 /**
  * 
@@ -15,6 +16,7 @@ import com.avaj.utils.Settings;
  */
 public class Block {
 	transient public static Block TOP;
+//	transient public static Block GENESIS;
 
 	private String hash;
 	private Instant timeStamp;
@@ -22,16 +24,18 @@ public class Block {
 	private BigInteger difficulty;
 	private long reward;
 	private long length;
+	private Account creator;
 
 	private AccountManager accountManager;
 	private TransactionManager transactionManager;
-	private Block previousBlock;
+	transient private Block previousBlock;
 
-	public Block(Block previousBlock) {
+	public Block(Block previousBlock, Account creator) {
 		this.previousBlock = previousBlock;
 		this.timeStamp = Instant.now();
 		this.nonce = Long.MIN_VALUE;
 		this.length = isGenesis() ? 0 : this.previousBlock.getLength() + 1;
+		this.creator = creator;
 
 		retargetDifficulty();
 		reduceReward();
@@ -137,10 +141,10 @@ public class Block {
 	}
 
 	public boolean isDifficultyValid() {
-		BigInteger hash = new BigInteger(CryptoUtils.hexToBinary(getHash()));
+		BigInteger hash = new BigInteger(this.hash, 16);
 
-		// hash is bigger than or equals with difficulty
-		return hash.compareTo(this.difficulty) > -1;
+		// hash is smaller than or equals with difficulty
+		return hash.compareTo(this.difficulty) < 1;
 	}
 
 	/**
@@ -152,27 +156,33 @@ public class Block {
 		build();
 
 		System.out.print("Start mining... ");
-		String target = "0";
 
 		LocalTime startTime = LocalTime.now();
 
 		// never stop
-		OUT: while (true) {
-			while (this.nonce <= Long.MAX_VALUE) {
-				if (CryptoUtils.hexToBinary(doHash()).startsWith(target)) {
-					this.hash = doHash();
+		while (true) {
+			// init values
+			this.timeStamp = Instant.now();
 
-					System.out.println("Block mined!");
-					LocalTime finishTime = LocalTime.now();
-					String duration = Duration.between(startTime, finishTime).toMillis() + "";
-					System.out.println("Duration:  " + duration + " ms");
-					break OUT;
+			// do hash
+			this.hash = doHash();
+
+			// check difficulty
+			if (isDifficultyValid()) {
+				if (Settings.DEBUG) {
+					System.out.println("\nhash: " + this.hash);
+					System.out.println("gene: " + Settings.GENESIS_DIFFICULTY.toString(16));
 				}
-				nonce++;
+
+				System.out.println("Block mined!");
+				LocalTime finishTime = LocalTime.now();
+				String duration = Duration.between(startTime, finishTime).toMillis() + "";
+				System.out.println("Duration:  " + duration + " ms");
+				break;
 			}
 
-			// update time
-			this.timeStamp = Instant.now();
+			// increase nonce
+			this.nonce = (this.nonce + 1) % Long.MAX_VALUE;
 		}
 
 		// update TOP
@@ -181,6 +191,10 @@ public class Block {
 
 	public long getLength() {
 		return this.length;
+	}
+
+	public Account getCreator() {
+		return this.creator;
 	}
 
 	/**
@@ -248,10 +262,6 @@ public class Block {
 
 	public void build() {
 		this.transactionManager.processTransactions();
-	}
-
-	public Account getMiner() {
-		return this.transactionManager.getMiner();
 	}
 
 	@Override

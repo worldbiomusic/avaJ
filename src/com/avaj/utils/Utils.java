@@ -3,6 +3,8 @@ package com.avaj.utils;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.avaj.crypto.FileUtils;
 import com.avaj.crypto.KeyWallet;
@@ -32,4 +34,11 @@ public class Utils {
 			return null;
 		}
 	}
+
+	public void debug(String msg) {
+		if (Settings.DEBUG) {
+			Logger.getLogger("avaj").log(Level.WARNING, msg);
+		}
+	}
+
 }

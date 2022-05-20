@@ -1,7 +1,6 @@
 package com.avaj;
 
 import java.io.File;
-import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -19,18 +18,9 @@ public class avaJTestMain {
 	public static void main(String[] args) {
 //		Security.addProvider(new BouncyCastleProvider());
 
-		BigInteger difficulty = new BigInteger("4");
-//		BigInteger hash = new BigInteger("");
-//		System.out.println(difficulty.compareTo(hash));
-		
-		System.out.println(difficulty);
-		
-		difficulty.multiply(new BigInteger("2"));
-		System.out.println(difficulty);
-
 		try {
 			avaJTestMain t = new avaJTestMain();
-//			t.blockchain();
+			t.blockchain();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -52,18 +42,18 @@ public class avaJTestMain {
 			// my account
 			KeyWallet myKey = Utils.loadKeyWallet(new File("account" + File.separator + "public-key"),
 					new File("account" + File.separator + "private-key"));
-			Account miner = new Account(myKey);
+			Account creator = new Account(myKey);
 
 			// avaJ
 			Account avaJ = getGenesisAvajAccount();
 
 			// genesis block
-			Block genesisBlock = new Block(null);
+			Block genesisBlock = new Block(null, creator);
 			genesisBlock.getAccountManager().addAccount(avaJ);
-			genesisBlock.getAccountManager().addAccount(miner);
+			genesisBlock.getAccountManager().addAccount(creator);
 
 			// create reward transaction
-			Transaction tx = new Transaction(avaJ, miner, genesisBlock.getReward(), 0);
+			Transaction tx = new Transaction(avaJ, creator, genesisBlock.getReward(), 0);
 			genesisBlock.getTransactionManager().addTransaction(tx);
 
 			genesisBlock.mine();
@@ -71,34 +61,38 @@ public class avaJTestMain {
 			System.out.println(gson.toJson(genesisBlock));
 
 			System.out.println("avaJ: " + avaJ.getValue());
-			System.out.println("miner: " + miner.getValue());
+			System.out.println("creator: " + creator.getValue());
 
 			// second
-			Block secondBlock = new Block(genesisBlock);
+			Block secondBlock = new Block(genesisBlock, creator);
 
-//			avaJ = secondBlock.getAccountManager().getAccount(avaJ.getHexPublicKey());
-//			miner = secondBlock.getAccountManager().getAccount(miner.getHexPublicKey());
+			avaJ = secondBlock.getAccountManager().getAccount(avaJ.getHexPublicKey());
+			creator = secondBlock.getAccountManager().getAccount(creator.getHexPublicKey());
 			secondBlock.getTransactionManager()
-					.addTransaction(new Transaction(avaJ, miner, secondBlock.getReward(), 0));
+					.addTransaction(new Transaction(avaJ, creator, secondBlock.getReward(), 0));
 
 			secondBlock.mine();
 			System.out.println("Validation2: " + secondBlock.isValid());
 			System.out.println(gson.toJson(secondBlock));
 
 			System.out.println("avaJ: " + avaJ.getValue());
-			System.out.println("miner: " + miner.getValue());
+			System.out.println("creator: " + creator.getValue());
 
 			// third
-			Block thirdBlock = new Block(secondBlock);
+			Block thirdBlock = new Block(secondBlock, creator);
 
-//			avaJ = thirdBlock.getAccountManager().getAccount(avaJ.getHexPublicKey());
-//			miner = thirdBlock.getAccountManager().getAccount(miner.getHexPublicKey());
-			thirdBlock.getTransactionManager().addTransaction(new Transaction(avaJ, miner, thirdBlock.getReward(), 0));
+			avaJ = thirdBlock.getAccountManager().getAccount(avaJ.getHexPublicKey());
+			creator = thirdBlock.getAccountManager().getAccount(creator.getHexPublicKey());
+			thirdBlock.getTransactionManager()
+					.addTransaction(new Transaction(avaJ, creator, thirdBlock.getReward(), 0));
 
 			thirdBlock.mine();
 
 			System.out.println("Validation3: " + thirdBlock.isValid());
 			System.out.println(gson.toJson(thirdBlock));
+			
+			System.out.println("avaJ: " + avaJ.getValue());
+			System.out.println("creator: " + creator.getValue());
 
 //			Block deserializedBlock = gson.fromJson(jsonString, Block.class);
 //			System.out.println(gson.toJson(deserializedBlock));

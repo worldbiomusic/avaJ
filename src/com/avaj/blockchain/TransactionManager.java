@@ -53,7 +53,7 @@ public class TransactionManager {
 	public void processTransactions() {
 		AccountManager accountManager = this.block.getAccountManager();
 		Account avaJ = block.getAccountManager().getAvaJ();
-		Account miner = block.getMiner();
+		Account creator = block.getCreator();
 
 		Set<Transaction> validTransactions = new HashSet<>();
 
@@ -89,8 +89,8 @@ public class TransactionManager {
 
 			long fee = tx.getFee();
 			// give fee to miner
-			if (miner.canValueChange(fee)) {
-				miner.plusValue(fee);
+			if (creator.canValueChange(fee)) {
+				creator.plusValue(fee);
 			}
 			// give fee to avaJ account
 			else if (avaJ.canValueChange(fee)) {
@@ -102,16 +102,6 @@ public class TransactionManager {
 
 		// remove invalid transcations
 		this.transactions.stream().filter(allTx -> !validTransactions.contains(allTx)).forEach(transactions::remove);
-	}
-
-	public Account getMiner() {
-		Account avaJ = block.getAccountManager().getAvaJ();
-		for (Transaction tx : this.transactions) {
-			if (tx.getSender().equals(avaJ)) {
-				return tx.getReceiver();
-			}
-		}
-		return null;
 	}
 
 	public long getTransactionTotalFee() {

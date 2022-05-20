@@ -4,9 +4,11 @@ import java.io.File;
 import java.math.BigInteger;
 
 public class Settings {
+	public static boolean DEBUG = true;
+	
 	public static final String CRYPTO_ALGORITHM = "RSA";
 
-	public static final BigInteger GENESIS_DIFFICULTY = new BigInteger("0x100000");
+	public static final BigInteger GENESIS_DIFFICULTY = new BigInteger("001" + ("0".repeat(61)), 16);
 	public static final long GENESIS_REWARD = 1_000;
 	public static final long TOTAL_SUPPLY = 5_143_521_600L; // 50 years
 
