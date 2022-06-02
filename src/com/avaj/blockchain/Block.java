@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import com.avaj.crypto.CryptoUtils;
 import com.avaj.utils.Settings;
 import com.avaj.utils.Utils;
+import com.google.gson.Gson;
 
 /**
  * 
@@ -28,7 +29,7 @@ public class Block {
 
 	private AccountManager accountManager;
 	private TransactionManager transactionManager;
-	transient private Block previousBlock;
+	private Block previousBlock;
 
 	public Block(Block previousBlock, Account creator) {
 		this.previousBlock = previousBlock;
@@ -155,7 +156,7 @@ public class Block {
 		// build
 		build();
 
-		System.out.print("Start mining... ");
+		System.out.println("Start mining... ");
 
 		LocalTime startTime = LocalTime.now();
 
@@ -170,8 +171,8 @@ public class Block {
 			// check difficulty
 			if (isDifficultyValid()) {
 				if (Settings.DEBUG) {
-					System.out.println("\nhash: " + this.hash);
-					System.out.println("gene: " + Settings.GENESIS_DIFFICULTY.toString(16));
+					System.out.println("hash: " + this.hash);
+					System.out.println("diff: " + Settings.GENESIS_DIFFICULTY.toString(16));
 				}
 
 				System.out.println("Block mined!");
@@ -204,9 +205,6 @@ public class Block {
 	 * @return Block
 	 */
 	public Block indexOf(long index) {
-		// plus index 1
-		index += 1;
-
 		Block block = this;
 		for (int i = 0; i < getLength() - index; i++) {
 			block = block.getPreviousBlock();
@@ -264,19 +262,29 @@ public class Block {
 		this.transactionManager.processTransactions();
 	}
 
-	@Override
-	public String toString() {
-		return "Block [\nhash=" + hash + ", \ntimeStamp=" + timeStamp + ", \nnonce=" + nonce + ", \ndifficulty="
-				+ difficulty + ", \nreward=" + reward + ", \naccounts=" + this.accountManager.getAccounts()
-				+ ", \ntransactions=" + this.transactionManager.getTransactions() + ", \npreviousBlock=" + previousBlock
-				+ "]";
+	public enum Scope {
+		ONE, ALL;
 	}
 
-//	@Override
-//	public String toString() {
-//		return "Block [hash=" + hash + ", \\ntimeStamp=" + timeStamp + ", \\nnonce=" + nonce + ", \\ndifficulty="
-//				+ difficulty + ", \\nreward=" + reward + ", \\naccounts=" + accounts + ", \\ntransactions="
-//				+ transactions + ", \\npreviousBlock=" + previousBlock + "]";
-//	}
+	synchronized public String data(Scope scope) {
+		Gson gson = Utils.gson();
+
+		Block preBlock = this.previousBlock;
+		if (scope == Scope.ONE) {
+			this.previousBlock = null;
+		}
+
+		String gsonData = gson.toJson(this);
+
+		this.previousBlock = preBlock;
+
+		return gsonData;
+
+//		String previousBlockStr = (scope == Scope.ONE) ? "" : ", \npreviousBlock=" + previousBlock;
+//		return "Block [\nhash=" + hash + ", \ntimeStamp=" + timeStamp + ", \nnonce=" + nonce + ", \ndifficulty="
+//				+ difficulty + ", \nreward=" + reward + ", \nlength=" + length + ", \ncreator=" + creator
+//				+ ", \naccounts=" + this.accountManager.getAccounts() + ", \ntransactions="
+//				+ this.transactionManager.getTransactions() + previousBlockStr + "]";
+	}
 
 }

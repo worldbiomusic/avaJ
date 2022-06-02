@@ -83,4 +83,10 @@ public class KeyWallet implements Cloneable {
 		String privateKeyHex = CryptoUtils.bytesToHex(this.privateKey.getEncoded());
 		return new KeyWallet(publicKeyHex, privateKeyHex);
 	}
+
+	@Override
+	public String toString() {
+		return "KeyWallet [\npublicKey=" + CryptoUtils.bytesToHex(this.publicKey.getEncoded()) + "]";
+	}
+
 }

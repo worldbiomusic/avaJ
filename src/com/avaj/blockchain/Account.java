@@ -94,4 +94,9 @@ public class Account implements Cloneable {
 		}
 		return null;
 	}
+
+	@Override
+	public String toString() {
+		return "Account [\nkeyWallet=" + this.keyWallet.toString() + "\nvalue=" + this.value + "]";
+	}
 }

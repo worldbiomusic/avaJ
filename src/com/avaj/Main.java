@@ -7,6 +7,10 @@ import com.avaj.utils.Settings;
 
 public class Main {
 	public static void main(String[] args) {
+		// mine blocks first
+		avaJTestMain.main(args);
+		
+		// start command
 		Main main = new Main();
 		main.setup();
 

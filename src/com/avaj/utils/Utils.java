@@ -26,6 +26,10 @@ public class Utils {
 		return b.create();
 	}
 
+//	public static Gson gsonOneBlock() {
+//		return gson().newBuilder().excludeFieldsWithoutExposeAnnotation().create();
+//	}
+
 	public static KeyWallet loadKeyWallet(File publicKeyFile, File privateKeyFile) {
 		try {
 			return new KeyWallet(FileUtils.load(publicKeyFile), FileUtils.load(privateKeyFile));

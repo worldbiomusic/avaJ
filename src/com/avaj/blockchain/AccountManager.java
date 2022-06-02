@@ -42,9 +42,14 @@ public class AccountManager {
 		}
 		return null;
 	}
-	
+
 	public boolean containsAccount(Account account) {
 		return this.accounts.contains(account);
+	}
+
+	public boolean containsAccount(String publicKey) {
+		return this.accounts.stream().map(a -> a.getHexPublicKey()).filter(a -> a.equals(publicKey)).toList()
+				.size() > 0;
 	}
 
 	public Account getAvaJ() {

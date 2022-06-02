@@ -24,7 +24,9 @@
 - Change difficulty algorithm
 - Add `length` to Block
 
-
+# 2022-06-03
+- Add more commands
+- Add Block scope
 
 
 

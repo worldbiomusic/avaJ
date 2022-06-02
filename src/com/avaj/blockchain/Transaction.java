@@ -88,4 +88,11 @@ public class Transaction {
 		}
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return "Transaction [\nhash=" + hash + ", \nsender=" + sender + ", \nreceiver=" + receiver + ", \nvalue="
+				+ value + ", \nfee=" + fee + ", \nsignature=" + signature + ", \ntimeStamp=" + timeStamp + "]";
+	}
+
 }

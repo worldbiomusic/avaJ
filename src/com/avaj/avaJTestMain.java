@@ -7,6 +7,7 @@ import java.security.spec.InvalidKeySpecException;
 import com.avaj.blockchain.Account;
 import com.avaj.blockchain.Block;
 import com.avaj.blockchain.Transaction;
+import com.avaj.blockchain.Block.Scope;
 import com.avaj.crypto.CryptoUtils;
 import com.avaj.crypto.FileUtils;
 import com.avaj.crypto.KeyWallet;
@@ -58,7 +59,8 @@ public class avaJTestMain {
 
 			genesisBlock.mine();
 			System.out.println("Validation1: " + genesisBlock.isValid());
-			System.out.println(gson.toJson(genesisBlock));
+//			System.out.println(gson.toJson(genesisBlock));
+			System.out.println(genesisBlock.data(Scope.ONE));
 
 			System.out.println("avaJ: " + avaJ.getValue());
 			System.out.println("creator: " + creator.getValue());
@@ -73,7 +75,8 @@ public class avaJTestMain {
 
 			secondBlock.mine();
 			System.out.println("Validation2: " + secondBlock.isValid());
-			System.out.println(gson.toJson(secondBlock));
+//			System.out.println(gson.toJson(secondBlock));
+			System.out.println(genesisBlock.data(Scope.ONE));
 
 			System.out.println("avaJ: " + avaJ.getValue());
 			System.out.println("creator: " + creator.getValue());
@@ -89,8 +92,9 @@ public class avaJTestMain {
 			thirdBlock.mine();
 
 			System.out.println("Validation3: " + thirdBlock.isValid());
-			System.out.println(gson.toJson(thirdBlock));
-			
+//			System.out.println(gson.toJson(thirdBlock));		
+			System.out.println(genesisBlock.data(Scope.ONE));
+
 			System.out.println("avaJ: " + avaJ.getValue());
 			System.out.println("creator: " + creator.getValue());
 
