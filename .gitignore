@@ -68,3 +68,6 @@ dependency-reduced-pom.xml
 
 # avaJ
 account/
+
+# IntelliJ
+.idea/
